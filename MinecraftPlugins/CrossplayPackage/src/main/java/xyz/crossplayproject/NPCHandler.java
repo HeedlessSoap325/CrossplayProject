@@ -46,7 +46,7 @@ public class NPCHandler {
                 public void run() {
                     player.execute();
                 }
-            }.runTask(JavaPlugin.getPlugin(CrossplayPackage.class));
+            }.runTask(CrossplayPackage.getInstance());
 
             return "OK";
         } catch (Exception e) {

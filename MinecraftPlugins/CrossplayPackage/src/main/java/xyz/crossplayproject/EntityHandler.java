@@ -5,10 +5,13 @@ import org.bukkit.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.TNTPrimed;
+import org.bukkit.plugin.Plugin;
 import spark.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 public class EntityHandler {
 
@@ -59,37 +62,44 @@ public class EntityHandler {
     }
 
     private List<MobPosition> getMobData() {
-        List<MobPosition> mobPositions = new ArrayList<>();
-        for (World world : Bukkit.getServer().getWorlds()) {
-            for (Chunk chunk : world.getLoadedChunks()) {
-                for (Entity entity : chunk.getEntities()) {
-                    if (entity instanceof LivingEntity livingEntity && !(entity instanceof org.bukkit.entity.Player)) {
-                        String mobType = livingEntity.getType().name();
-                        mobPositions.add(new MobPosition(
-                                livingEntity.getUniqueId().toString(),
-                                livingEntity.getLocation().getX(),
-                                livingEntity.getLocation().getY(),
-                                livingEntity.getLocation().getZ(),
-                                livingEntity.getLocation().getYaw(),
-                                livingEntity.getLocation().getPitch(),
-                                mobType
-                        ));
-                    } else if (entity instanceof TNTPrimed primedTNT) {
-                        Location tntLocation = primedTNT.getLocation();
-                        mobPositions.add(new MobPosition(
-                                primedTNT.getUniqueId().toString(),
-                                tntLocation.getX(),
-                                tntLocation.getY(),
-                                tntLocation.getZ(),
-                                0,
-                                0,
-                                "PRIMED_TNT"
-                        ));
+        try {
+            return Bukkit.getScheduler().callSyncMethod(CrossplayPackage.getInstance(), () -> {
+                List<MobPosition> mobPositions = new ArrayList<>();
+                for (World world : Bukkit.getServer().getWorlds()) {
+                    for (Chunk chunk : world.getLoadedChunks()) {
+                        for (Entity entity : chunk.getEntities()) {
+                            if (entity instanceof LivingEntity livingEntity && !(entity instanceof org.bukkit.entity.Player)) {
+                                String mobType = livingEntity.getType().name();
+                                mobPositions.add(new MobPosition(
+                                        livingEntity.getUniqueId().toString(),
+                                        livingEntity.getLocation().getX(),
+                                        livingEntity.getLocation().getY(),
+                                        livingEntity.getLocation().getZ(),
+                                        livingEntity.getLocation().getYaw(),
+                                        livingEntity.getLocation().getPitch(),
+                                        mobType
+                                ));
+                            } else if (entity instanceof TNTPrimed primedTNT) {
+                                Location tntLocation = primedTNT.getLocation();
+                                mobPositions.add(new MobPosition(
+                                        primedTNT.getUniqueId().toString(),
+                                        tntLocation.getX(),
+                                        tntLocation.getY(),
+                                        tntLocation.getZ(),
+                                        0,
+                                        0,
+                                        "PRIMED_TNT"
+                                ));
+                            }
+                        }
                     }
                 }
-            }
+                return mobPositions;
+            }).get();
+        } catch (InterruptedException | ExecutionException e) {
+            Thread.currentThread().interrupt();
+            return Collections.emptyList();
         }
-        return mobPositions;
     }
 
     private WorldState getWorldState() {

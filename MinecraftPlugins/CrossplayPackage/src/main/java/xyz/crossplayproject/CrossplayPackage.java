@@ -3,6 +3,7 @@ package xyz.crossplayproject;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import spark.Service;
 
@@ -20,10 +21,11 @@ public class CrossplayPackage extends JavaPlugin {
     private NPCHandler npcHandler;
     private Service sparkService;
     private int sparkPort;
+    private static CrossplayPackage instance;
 
     @Override
     public void onEnable() {
-
+        instance = this;
         if (!getDataFolder().exists()) {
             getDataFolder().mkdir();
         }
@@ -81,6 +83,9 @@ public class CrossplayPackage extends JavaPlugin {
         }
     }
 
+    public static CrossplayPackage getInstance() {
+        return instance;
+    }
 
     @Override
     public void onDisable() {

@@ -40,7 +40,7 @@ public class BlockHandler {
                 String cord1Param = request.queryParams("cord1");
                 String cord2Param = request.queryParams("cord2");
 
-                JsonArray blockArray = new JsonArray();
+                JsonArray blockArray;
 
                 if (cord1Param != null && cord2Param != null) {
                     String[] cord1Parts = cord1Param.split(",");
@@ -66,39 +66,53 @@ public class BlockHandler {
                     int minZ = Math.min(z1, z2);
                     int maxZ = Math.max(z1, z2);
 
-                    CompletableFuture<Void> future = CompletableFuture.runAsync(() -> IntStream.rangeClosed(minX, maxX).parallel().forEach(x -> IntStream.rangeClosed(minZ, maxZ).parallel().forEach(z -> {
-                        Chunk chunk = Bukkit.getWorlds().getFirst().getChunkAt(x >> 4, z >> 4);
-                        ChunkSnapshot chunkSnapshot = chunk.getChunkSnapshot(false, true, false);
+                    blockArray = Bukkit.getScheduler().callSyncMethod(CrossplayPackage.getInstance(), () -> {
+                        JsonArray result = new JsonArray();
 
-                        for (int y = minY; y <= maxY; y++) {
-                            Material material = chunkSnapshot.getBlockType(x & 15, y, z & 15);
-                            if (!material.isAir()) {
-                                JsonObject blockInfo = new JsonObject();
-                                blockInfo.addProperty("t", material.toString());
-                                blockInfo.addProperty("x", x);
-                                blockInfo.addProperty("y", y);
-                                blockInfo.addProperty("z", z);
+                        // Cache chunk snapshots so each chunk is only snapshotted once
+                        Map<Long, ChunkSnapshot> snapshotCache = new HashMap<>();
 
-                                BlockData blockData = chunkSnapshot.getBlockData(x & 15, y, z & 15);
-                                String state = getFormattedState(blockData);
-                                if (state != null) {
-                                    blockInfo.addProperty("s", state);
-                                }
+                        for (int x = minX; x <= maxX; x++) {
+                            for (int z = minZ; z <= maxZ; z++) {
+                                int chunkX = x >> 4;
+                                int chunkZ = z >> 4;
+                                long chunkKey = (((long) chunkX) << 32) | (chunkZ & 0xFFFFFFFFL);
 
-                                if (biomeSensitiveBlocks.contains(material)) {
-                                    Biome biome = chunkSnapshot.getBiome(x & 15, y, z & 15);
-                                    blockInfo.addProperty("b", biome.toString());
-                                }
+                                ChunkSnapshot chunkSnapshot = snapshotCache.computeIfAbsent(chunkKey, k -> {
+                                    Chunk chunk = Bukkit.getWorlds().getFirst().getChunkAt(chunkX, chunkZ);
+                                    return chunk.getChunkSnapshot(false, true, false);
+                                });
 
-                                synchronized (blockArray) {
-                                    blockArray.add(blockInfo);
+                                for (int y = minY; y <= maxY; y++) {
+                                    Material material = chunkSnapshot.getBlockType(x & 15, y, z & 15);
+                                    if (!material.isAir()) {
+                                        JsonObject blockInfo = new JsonObject();
+                                        blockInfo.addProperty("t", material.toString());
+                                        blockInfo.addProperty("x", x);
+                                        blockInfo.addProperty("y", y);
+                                        blockInfo.addProperty("z", z);
+
+                                        BlockData blockData = chunkSnapshot.getBlockData(x & 15, y, z & 15);
+                                        String state = getFormattedState(blockData);
+                                        if (state != null) {
+                                            blockInfo.addProperty("s", state);
+                                        }
+
+                                        if (biomeSensitiveBlocks.contains(material)) {
+                                            Biome biome = chunkSnapshot.getBiome(x & 15, y, z & 15);
+                                            blockInfo.addProperty("b", biome.toString());
+                                        }
+
+                                        result.add(blockInfo);
+                                    }
                                 }
                             }
                         }
-                    })));
 
-                    future.get();
+                        return result;
+                    }).get();
                 } else {
+                    blockArray = new JsonArray();
                     String chunkXParam = request.queryParams("chunkX");
                     String chunkZParam = request.queryParams("chunkZ");
 
