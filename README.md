@@ -370,7 +370,7 @@ curl https://crossplayproject.xyz/api/uuid/92270a4f-f954-4087-a932-e8d0e5deb2bd/
 7. **Install Plugins**:
    - Navigate to the `plugins` directory (create it if necessary) and download the required plugins:
      - [CrossplayPackage.jar](https://github.com/Atmerek/CrossplayProject/releases/tag/v1.3)
-     - [Citizens-2.0.35.jar](https://ci.citizensnpcs.co/job/citizens2/)
+     - [Citizens-2.0.42-b4171.jar](https://ci.citizensnpcs.co/job/Citizens2/4171/)
 
 8. **Start Server**:
    - Run the server again and allow it to generate necessary files.
