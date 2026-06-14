@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/CrossplayPackage.iml" filepath="$PROJECT_DIR$/CrossplayPackage.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/CrossplayPackage.iml" filepath="$PROJECT_DIR$/.idea/CrossplayPackage.iml" />
     </modules>
   </component>
 </project>
