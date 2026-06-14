@@ -12,18 +12,16 @@ local usernameToUUID = {}
 
 local updateInterval = 60 / 100 -- 100 requests per minute
 
-local dataUrl = "http://" .. ReplicatedStorage.IP.Value .. "/players"
-local crossplayApiUrl = "https://crossplayproject.xyz/api/uuid/"
-
 local function getUsername(uuid)
-	local url = crossplayApiUrl .. uuid
-	local response = HttpService:GetAsync(url)
+	local sessionUrl = "https://" .. game.ReplicatedStorage.SESSION_SERVER.Value .. "/session/minecraft/profile/" .. uuid
+	local response = HttpService:GetAsync(sessionUrl)
 	local jsonData = HttpService:JSONDecode(response)
-	return jsonData.username
+	return jsonData.name
 end
 
 local function handleRequest()
 	local success, pdata = pcall(function()
+		local dataUrl = "http://" .. ReplicatedStorage.IP.Value .. "/players"
 		return HttpService:GetAsync(dataUrl)
 	end)
 
@@ -72,7 +70,7 @@ local function handleRequest()
 
 			local playerModel = playerModels[uuid]
 			local position = Vector3.new((data.x * 3) - 1.5, (data.y * 3) + 0.3, (data.z * 3) - 1.5)
-			local currentCFrame = playerModel:GetPrimaryPartCFrame()
+			---local currentCFrame = playerModel:GetPrimaryPartCFrame()
 			local newCFrame = CFrame.new(position)
 
 			local tweenInfo = TweenInfo.new(0.5, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
