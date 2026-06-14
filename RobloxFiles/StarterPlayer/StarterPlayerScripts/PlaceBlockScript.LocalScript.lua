@@ -8,7 +8,13 @@ local player = Players.LocalPlayer
 local remoteEvent = ReplicatedStorage:WaitForChild("BlockPlaceEvent")
 
 local modelsFolder = ReplicatedStorage:WaitForChild("models")
-local modifyModeGui = player:WaitForChild("PlayerGui"):WaitForChild("ModifyMode")
+
+local playerGui = player:WaitForChild("PlayerGui")
+local modifyModeGui = playerGui:FindFirstChild("ModifyMode")
+while not modifyModeGui do
+	task.wait()
+	modifyModeGui = playerGui:FindFirstChild("ModifyMode")
+end
 local placeButton = modifyModeGui:WaitForChild("Frame"):WaitForChild("Place")
 
 local isPlacingEnabled = false

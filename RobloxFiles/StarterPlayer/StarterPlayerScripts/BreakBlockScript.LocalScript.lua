@@ -5,7 +5,13 @@ local UserInputService = game:GetService("UserInputService")
 local player = Players.LocalPlayer
 local remoteEvent = ReplicatedStorage:WaitForChild("BlockBrokenEvent")
 
-local modifyModeGui = player:WaitForChild("PlayerGui"):WaitForChild("ModifyMode")
+local playerGui = player:WaitForChild("PlayerGui")
+
+local modifyModeGui = playerGui:FindFirstChild("ModifyMode")
+while not modifyModeGui do
+	task.wait()
+	modifyModeGui = playerGui:FindFirstChild("ModifyMode")
+end
 local breakButton = modifyModeGui:WaitForChild("Frame"):WaitForChild("Break")
 
 local isBreakingEnabled = false
