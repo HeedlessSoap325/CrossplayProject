@@ -249,11 +249,14 @@ The Roblox side provides a framework to help you start creating your own code. I
 - **IP.rbxm**  
   Contains a text value with the server IP.
 
+- **SESSION_SERVER.rbxm**  
+  Contains a text value with the prefered minecraft session server.
+
 - **BlockStateManager.lua**  
   An additional module for applying rotation to models.
 
-- **CurrentBlocks.lua**  
-  An additional module for synchronizing blocks across scripts.
+- **BlockService.lua**  
+  An additional module to handle the rendering of the minecraft world.
 
 - **Chat.rbxm**  
   A RemoteEvent for the chat messages.
